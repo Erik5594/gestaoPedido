@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition template="/WEB-INF/templates/Layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:o="http://omnifaces.org/ui">
+
+	<ui:define name="titulo">#{cadastroClienteControlador.editar() ? 'Edição':'Cadastro'} de Cliente</ui:define>
+
+	<ui:define name="conteudo">
+		<f:metadata>
+    		<o:viewParam name="cliente" value="#{cadastroClienteControlador.cliente}" />
+    	</f:metadata>
+    	
+		<h:form id="frmCadastroCliente">
+			<p:messages id="mensagens" autoUpdate="true" closable="true"/>
+			<h1>#{cadastroClienteControlador.editar() ? 'Edição':'Cadastro'} de Cliente</h1>
+			<!-- Inicio Barra de opoces -->
+			<p:toolbar style="margin-bottom: 20px">
+				<!-- Inicio de grupo de Barra de opces a esquerda -->
+				<p:toolbarGroup>
+					<p:commandButton value="#{cadastroClienteControlador.editar() ? 'Editar':'Salvar'}" style="margin-right: 5px"
+					actionListener="#{cadastroClienteControlador.salvar()}" update="@form"/>
+					<p:button value="Novo"
+						outcome="/pages/private/cliente/cadastro/CadastroCliente.xhtml" />
+				</p:toolbarGroup>
+				<!-- Fim de grupo de Barra de opces a esquerda -->
+				
+				<!-- Inicio de grupo de Barra de opces a Direita -->
+				<p:toolbarGroup align="right">
+					<p:button value="Pesquisar" outcome="/pages/private/cliente/pesquisa/PesquisaCliente"/>
+				</p:toolbarGroup>
+				<!-- Fim de grupo de Barra de opces a Direita -->
+			</p:toolbar>
+			<!-- Fim Barra de opcoes -->
+			
+			<!-- Inicio Codigo Cliente -->
+			<h:panelGrid columns="2" id="panelCodCliente" style="margin-bottom: 15px">
+				<p:outputLabel value="Cod. Cliente: " for="codCliente" />
+				<p:inputText id="codCliente" disabled="true" style="width: 60px" />
+			</h:panelGrid>
+			<!-- Fim Codigo Cliente -->
+
+			<!-- Inicio TabView -->
+			<p:tabView>
+				<!--Inicio Tab Principal -->
+				<p:tab title="Dados Principais" id="principalTab">
+					<h:panelGrid columns="2" id="panelGridDadosCliente">
+						<p:outputLabel value="Nome: " for="nome" />
+						<p:inputText id="nome" style="width: 300px" onkeyup="this.value=this.value.toUpperCase();"
+						value="#{cadastroClienteControlador.cliente.nome}"/>
+						
+						<p:outputLabel value="Tipo: " for="tipo"/>
+						<p:selectOneRadio id="tipo" value="#{cadastroClienteControlador.cliente.fisicaJuridica}" converter="converterTipoPessoa" >
+							<f:selectItems value="#{cadastroClienteControlador.tiposPessoa}" var="tipoPessoa"
+							itemLabel="#{tipoPessoa.descTipoPessoa}" itemValue="#{tipoPessoa}"/>
+							<p:ajax update="cnpj" process="tipo"/>
+						</p:selectOneRadio>
+
+						<p:outputLabel value="CNPJ/CPF: " for="cnpj" />
+						<p:inputMask id="cnpj" mask="#{cadastroClienteControlador.carregaMascaraCnpjOuCpfPrimefaces()}"
+						value="#{cadastroClienteControlador.cliente.cgcCpf}" style="width: 120px"/>
+					</h:panelGrid>
+				</p:tab>
+				<!--Fim Tab Principal -->
+				
+				<!--Inicio Tab endereco -->
+				<p:tab title="Endereço" id="enderecoTab">
+				<p:panel style="margin-bottom: 15px" id="panelEndereco">
+					<h:panelGrid columns="3" id="panelGridEnderecoCep">
+						<p:outputLabel value="CEP:" for="cep" />
+						<p:inputMask id="cep" mask="99.999-999" converter="converterLong" disabled="#{cadastroClienteControlador.bloqPesquisaCep}"
+						value="#{cadastroClienteControlador.cep.cep}"	style="width: 70px" />
+						
+						<p:commandButton icon="ui-icon-pencil" rendered="#{cadastroClienteControlador.bloqPesquisaCep}"
+						actionListener="#{cadastroClienteControlador.habilitaPesquisaCep()}"
+						update="panelEndereco" process="@this"/>
+						
+						<p:commandButton icon="ui-icon-search" rendered="#{!cadastroClienteControlador.bloqPesquisaCep}" 
+						actionListener="#{cadastroClienteControlador.buscarEnderecoByCep()}"
+						update="panelEndereco" process="@this cep"/>
+					</h:panelGrid>
+					<h:panelGrid columns="2" id="panelGridLogradouroBairro">
+						<p:outputLabel value="Logradouro: " for="rua" />
+						<p:inputText id="rua" size="43" onkeyup="this.value=this.value.toUpperCase();"
+						value="#{cadastroClienteControlador.cep.rua}" disabled="#{cadastroClienteControlador.bloqueioNivel1}"/>
+						
+						<p:outputLabel value="Bairro: " for="bairro" />
+						<p:inputText id="bairro" onkeyup="this.value=this.value.toUpperCase();" size="43"
+						value="#{cadastroClienteControlador.cep.bairro}" disabled="#{cadastroClienteControlador.bloqueioNivel1}"/>
+					</h:panelGrid>
+						
+					<h:panelGrid columns="4" id="panelGridComplementoNumero">
+						<p:outputLabel value="Complemento: " for="complemento" />
+						<p:inputText id="complemento" onkeyup="this.value=this.value.toUpperCase();"
+						disabled="#{cadastroClienteControlador.bloqueiaEnderecoGeral}"
+						value="#{cadastroClienteControlador.endereco.complemento}"/>
+
+						<p:outputLabel value="Numero: " for="numero" />
+						<p:inputText id="numero" onkeyup="this.value=this.value.toUpperCase();" 
+							disabled="#{cadastroClienteControlador.bloqueiaEnderecoGeral}"
+						size="6" value="#{cadastroClienteControlador.endereco.numero}"/>
+					</h:panelGrid>
+						
+					<h:panelGrid columns="4" id="panelGridUfCidade">
+						<p:outputLabel value="UF: " for="uf" />
+						<p:inputText value="#{cadastroClienteControlador.cep.cidade.uf}"
+						id="uf" disabled="true" size="3"/>
+
+						<p:outputLabel value="Cidade: " for="cidade" />
+						<p:inputText value="#{cadastroClienteControlador.cep.cidade.nomeCidade}"
+						id="cidade" disabled="true" size="33"/>
+					</h:panelGrid>
+					
+					<h:panelGrid columns="2" id="panelGridIsEntrega">
+						<p:outputLabel value="Entrega: " for="entrega" />
+						<p:selectBooleanCheckbox id="entrega"
+						disabled="#{cadastroClienteControlador.bloqueiaEnderecoGeral}"
+						value="#{cadastroClienteControlador.endereco.enderecoEntrega}"/>
+					</h:panelGrid>
+					
+					<center>
+					<p:commandButton value="Adicionar" icon="ui-icon-check"
+					actionListener="#{cadastroClienteControlador.adicionaEndereco()}"
+					process="@this panelEndereco"
+					update="panelEndereco tabelaEnderecos"/>
+					</center>
+				</p:panel>
+					
+					<p:dataTable id="tabelaEnderecos" value="#{cadastroClienteControlador.cliente.endereco}" var="endereco"
+					emptyMessage="Sem endereço(s)" selection="#{cadastroClienteControlador.enderecoSelecionado}"
+					style="width: 100%; margin-top: 15px">
+					<f:facet name="header">
+					Endereços
+					</f:facet>
+					<p:column headerText="Cep" style="width: 7%">
+					<p:outputLabel value="#{endereco.cep.cep}"/>
+					</p:column>
+					
+					<p:column headerText="Logradouro" style="width: 20%">
+					<p:outputLabel value="#{endereco.rua}"/>
+					</p:column>
+					
+					<p:column headerText="Complemento" style="width: 20%">
+					<p:outputLabel value="#{endereco.complemento}"/>
+					</p:column>
+					
+					<p:column headerText="Número" style="width: 5%">
+					<p:outputLabel value="#{endereco.numero}"/>
+					</p:column>
+					
+					<p:column headerText="Bairro" style="width: 15%">
+					<p:outputLabel value="#{endereco.bairro}"/>
+					</p:column>
+					
+					<p:column headerText="Cidade" style="width: 15%">
+					<p:outputLabel value="#{endereco.cep.cidade.nomeCidade}"/>
+					</p:column>
+					
+					<p:column headerText="UF" style="width: 4%">
+					<p:outputLabel value="#{endereco.cep.cidade.uf}"/>
+					</p:column>
+					
+					<p:column headerText="Entrega" style="width: 7%">
+					<p:selectBooleanCheckbox value="#{endereco.enderecoEntrega}" disabled="true"/>
+					</p:column>
+					
+					<p:column width="7%">
+					<p:commandButton icon="ui-icon-trash" process="@this"
+					oncomplete="PF('confirmacaoRemocaoEndereco').show(); return false;">
+					<f:setPropertyActionListener target="#{cadastroClienteControlador.enderecoSelecionado}" value="#{endereco}"/>
+					</p:commandButton>
+					</p:column>
+					</p:dataTable>
+					
+					<p:confirmDialog header="Remover Endereço" message="Tem certeza que deseja remover o endereço?"
+					widgetVar="confirmacaoRemocaoEndereco" id="confirmacaoRemocaoEnderecoDialog">
+					<p:button icon="ui-icon-cancel" value="Não" onclick="PF('confirmacaoRemocaoEndereco').hide(); return false;"/>
+					<p:commandButton icon="ui-icon-check" value="Sim" oncomplete="PF('confirmacaoRemocaoEndereco').hide(); return false;"
+					action="#{cadastroClienteControlador.removerEnderecoDaLista()}" update="tabelaEnderecos" process="@this"/>
+					</p:confirmDialog>
+				</p:tab>
+				<!--Fim Tab endereco -->
+				
+				<!--Inicio Tab telefones -->
+				<p:tab title="Telefones" id="telefonesTab">
+					<h:panelGrid columns="5" id="gridTelefone">
+						<p:outputLabel value="Telefone: " />
+						<p:inputMask id="dddTelefone" mask="(99)" label="DDD" converter="converterNumber"
+							size="2" value="#{cadastroClienteControlador.telefone.ddd}"/>
+						<p:inputMask id="numeroTelefone" 
+						mask="99999999?9" label="Número" 
+							size="8" value="#{cadastroClienteControlador.telefone.numero}" />
+							
+							<p:selectOneMenu id="tipoTelefone" label="Tipo Telefone" value="#{cadastroClienteControlador.tipoTelefone}" converter="converterNumber">
+							<f:selectItem itemLabel="Selecione..." itemValue="9"
+								noSelectionOption="true"/>
+								<f:selectItem itemLabel="Celular" itemValue="0"/>
+								<f:selectItem itemLabel="Comercial" itemValue="1"/>
+								<f:selectItem itemLabel="Residencial" itemValue="2"/>
+								<f:selectItem itemLabel="Outro" itemValue="3"/>
+						</p:selectOneMenu>
+						<p:commandButton icon="ui-icon-plus" actionListener="#{cadastroClienteControlador.adicionaTelefone()}"
+						update="gridTelefone tabelaTelefones" process="gridTelefone"/>
+					</h:panelGrid>
+					
+					<p:dataTable id="tabelaTelefones" value="#{cadastroClienteControlador.cliente.telefones}" var="telefone"
+					emptyMessage="Sem telefone(s)" selection="#{cadastroClienteControlador.telefoneSelecionado}" style="width: 33%; margin-top: 15px">
+					<f:facet name="header">
+					Telefones
+					</f:facet>
+					<p:column headerText="DDD" style="width: 10%">
+					<p:outputLabel value="#{telefone.ddd}"/>
+					</p:column>
+					
+					<p:column headerText="Numero" style="width: 35%">
+					<p:outputLabel value="#{telefone.numero}"/>
+					</p:column>
+					
+					<p:column headerText="Tipo" style="width: 40%">
+					<p:outputLabel value="#{telefone.tipoTelefone}"/>
+					</p:column>
+					
+					<p:column width="15%">
+					<p:commandButton icon="ui-icon-trash" process="@this"
+					oncomplete="PF('confirmacaoRemocaoTelefone').show(); return false;">
+					<f:setPropertyActionListener target="#{cadastroClienteControlador.telefoneSelecionado}" value="#{telefone}"/>
+					</p:commandButton>
+					</p:column>
+					</p:dataTable>
+					
+					<p:confirmDialog header="Remover Telefone" message="Tem certeza que deseja remover o telefone?"
+					widgetVar="confirmacaoRemocaoTelefone" id="confirmacaoRemocaoTelefoneDialog">
+					<p:button icon="ui-icon-cancel" value="Não" onclick="PF('confirmacaoRemocaoTelefone').hide(); return false;"/>
+					<p:commandButton icon="ui-icon-check" value="Sim" oncomplete="PF('confirmacaoRemocaoTelefone').hide(); return false;"
+					action="#{cadastroClienteControlador.removerTelefoneDaLista()}" update="tabelaTelefones" process="@this"/>
+					</p:confirmDialog>
+				</p:tab>
+				<!--Fim Tab telefones -->
+				
+				<!--Inicio Tab emails -->
+				<p:tab title="E-mails" id="emailTab">
+					<h:panelGrid columns="5" id="gridEmail">
+						<p:outputLabel value="E-mail: " for="email" />
+						<p:inputText id="email"
+						value="#{cadastroClienteControlador.email.emailDestinatario}"/>
+						<p:outputLabel value="Nome Destinatário: " for="destinatarioEmail" style="margin-left: 8px"/>
+						<p:inputText id="destinatarioEmail" onkeyup="this.value=this.value.toUpperCase();"
+						value="#{cadastroClienteControlador.email.nomePessoaDestinatario}"/>
+						<p:commandButton icon="ui-icon-plus" actionListener="#{cadastroClienteControlador.adicionaEmail()}"
+						update="gridEmail tabelaEmails" process="gridEmail"/>
+					</h:panelGrid>
+
+					<p:dataTable id="tabelaEmails" value="#{cadastroClienteControlador.cliente.emails}" var="email"
+					emptyMessage="Sem e-mail(s)" selection="#{cadastroClienteControlador.emailSelecionado}" style="width: 40%; margin-top: 15px">
+					<f:facet name="header">
+					E-mails
+					</f:facet>
+					<p:column headerText="E-mail" width="40%">
+					<p:outputLabel value="#{email.emailDestinatario}"/>
+					</p:column>
+					
+					<p:column headerText="Nome Destinatário" width="45%">
+					<p:outputLabel value="#{email.nomePessoaDestinatario}"/>
+					</p:column>
+					
+					<p:column width="15%">
+					<p:commandButton icon="ui-icon-trash" process="@this"
+					oncomplete="PF('confirmacaoRemocaoEmail').show(); return false;">
+					<f:setPropertyActionListener target="#{cadastroClienteControlador.emailSelecionado}" value="#{email}"/>
+					</p:commandButton>
+					</p:column>
+					</p:dataTable>
+					
+					<p:confirmDialog header="Remover Email" message="Tem certeza que deseja remover o e-mail?"
+					widgetVar="confirmacaoRemocaoEmail" id="confirmacaoRemocaoEmailDialog">
+					<p:button icon="ui-icon-cancel" value="Não" onclick="PF('confirmacaoRemocaoEmail').hide(); return false;"/>
+					<p:commandButton icon="ui-icon-check" value="Sim" oncomplete="PF('confirmacaoRemocaoEmail').hide(); return false;"
+					action="#{cadastroClienteControlador.removerEmailDaLista()}" update="tabelaEmails" process="@this"/>
+					</p:confirmDialog>
+				</p:tab>
+				<!--Fim Tab emails -->
+				
+				<!--Inicio Tab veiculos -->
+				<p:tab title="Veículos" id="veiculoTab">
+					<h:panelGrid columns="6" id="gridVeiculo">
+						<p:outputLabel value="Placa: " for="placa" />
+						<p:inputText id="placa" onkeyup="this.value=this.value.toUpperCase();" maxlength="7"
+						value="#{cadastroClienteControlador.veiculo.placa}" placeholder="AAA0000" size="7"/>
+						
+						<p:outputLabel value="Chassi: " for="chassi" style="margin-left: 8px"/>
+						<p:inputText id="chassi" onkeyup="this.value=this.value.toUpperCase();"
+						value="#{cadastroClienteControlador.veiculo.chassi}"/>
+						
+						<p:outputLabel value="Tipo Veiculo " for="tipoVeiculo" />
+						<p:selectOneMenu id="tipoVeiculo" converter="converterTipoVeiculo" 
+						value="#{cadastroClienteControlador.veiculo.tipoVeiculo}">
+						<f:selectItem itemLabel="Selecione" noSelectionOption="true"/>
+						<f:selectItems value="#{cadastroClienteControlador.tipoVeiculo}" var="tipoVeiculo"
+							itemLabel="#{tipoVeiculo.tipoVeiculo}" itemValue="#{tipoVeiculo}"/>
+						</p:selectOneMenu>
+						
+						<p:outputLabel value="Marca: " for="marcaVeiculo" />
+						<p:inputText id="marcaVeiculo" onkeyup="this.value=this.value.toUpperCase();" maxlength="30"
+						value="#{cadastroClienteControlador.veiculo.marca}"/>
+						
+						<p:outputLabel value="Modelo: " for="modeloVeiculo" style="margin-left: 8px"/>
+						<p:inputText id="modeloVeiculo" onkeyup="this.value=this.value.toUpperCase();"
+						value="#{cadastroClienteControlador.veiculo.modelo}"/>
+						
+						<p:outputLabel value="Cor: " for="corVeiculo" />
+						<p:inputText id="corVeiculo" onkeyup="this.value=this.value.toUpperCase();"
+						value="#{cadastroClienteControlador.veiculo.cor}"/>
+					</h:panelGrid>
+					<center>
+						<p:commandButton icon="ui-icon-plus" value="Adicionar" actionListener="#{cadastroClienteControlador.adicionaVeiculo()}"
+						update="gridVeiculo tabelaVeiculos" process="@this gridVeiculo"/>
+					</center>
+
+					<p:dataTable id="tabelaVeiculos" value="#{cadastroClienteControlador.cliente.veiculos}" var="veiculo"
+					emptyMessage="Sem veiculo(s)" selection="#{cadastroClienteControlador.veiculoSelecionado}" style="width: 70%; margin-top: 15px">
+					<f:facet name="header">
+					Veículos
+					</f:facet>
+					<p:column headerText="Placa" width="15%">
+					<p:outputLabel value="#{veiculo.placa}"/>
+					</p:column>
+					
+					<p:column headerText="Chassi" width="50%">
+					<p:outputLabel value="#{veiculo.chassi}"/>
+					</p:column>
+					
+					<p:column headerText="Tipo Veiculo" width="25%">
+					<p:outputLabel value="#{veiculo.tipoVeiculo.tipoVeiculo}"/>
+					</p:column>
+					
+					<p:column headerText="Marca" width="25%">
+					<p:outputLabel value="#{veiculo.marca}"/>
+					</p:column>
+					
+					<p:column headerText="Modelo" width="25%">
+					<p:outputLabel value="#{veiculo.modelo}"/>
+					</p:column>
+					
+					<p:column headerText="Cor" width="25%">
+					<p:outputLabel value="#{veiculo.cor}"/>
+					</p:column>
+					
+					<p:column width="10%">
+					<p:commandButton icon="ui-icon-trash" process="@this"
+					oncomplete="PF('confirmacaoRemocaoVeiculo').show(); return false;">
+					<f:setPropertyActionListener target="#{cadastroClienteControlador.veiculoSelecionado}" value="#{veiculo}"/>
+					</p:commandButton>
+					</p:column>
+					</p:dataTable>
+					
+					<p:confirmDialog header="Remover Veículo" message="Tem certeza que deseja remover o veículo?"
+					widgetVar="confirmacaoRemocaoVeiculo" id="confirmacaoRemocaoVeiculoDialog">
+					<p:button icon="ui-icon-cancel" value="Não" onclick="PF('confirmacaoRemocaoVeiculo').hide(); return false;"/>
+					<p:commandButton icon="ui-icon-check" value="Sim" oncomplete="PF('confirmacaoRemocaoVeiculo').hide(); return false;"
+					action="#{cadastroClienteControlador.removerVeiculoDaLista()}" update="tabelaVeiculos" process="@this"/>
+					</p:confirmDialog>
+				</p:tab>
+				<!--Fim Tab veiculos -->
+				
+			</p:tabView>
+			<!-- Fim TabView -->
+			
+		</h:form>
+	</ui:define>
+</ui:composition>

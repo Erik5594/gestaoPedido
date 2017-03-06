@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+
+	<h:panelGrid columns="2" style="margin-bottom: 7px;" width="40%">
+		<p:column>
+			<p:outputLabel value="Número:" style="font-size: 15px" />
+			<p:inputText size="12" disabled="true" value="#{gerarOrdemServicoControlador.ordemServico.id}"/>
+		</p:column>
+		<p:column>
+			<p:outputLabel value="Data de criação:" style="font-size: 15px;" />
+			<p:calendar placeholder="DD/MM/YYYY" disabled="true" size="10"
+				pattern="dd/MM/yyyy" value="#{gerarOrdemServicoControlador.ordemServico.dataOrdemServico}"/>
+		</p:column>
+	</h:panelGrid>
+	<h:panelGrid columns="2" width="100%">
+		<p:panel header="Dados do Cliente" id="dadosCliente">
+			<h:panelGrid columns="2">
+				<p:outputLabel value="CPF/CNPJ:" />
+				<p:column>
+					<p:inputText size="14" value="#{gerarOrdemServicoControlador.cliente.cgcCpfFormatado}"
+						disabled="true" id="cgcCpf" style="margin-right: 10px"/>
+					<p:commandButton icon="ui-icon-search" actionListener="#{gerarOrdemServicoControlador.buscarCliente()}"
+					rendered="#{!gerarOrdemServicoControlador.alterarClienteOrcamento}" oncomplete="PF('consultaClienteDialog').show()"
+					process="@this" update="consultaClienteDialogId"/>
+				</p:column>
+				<p:outputLabel value="Nome:" />
+				<p:inputText size="60" value="#{gerarOrdemServicoControlador.cliente.nome}"
+					onkeyup="this.value=this.value.toUpperCase();" disabled="true" />
+			</h:panelGrid>
+		</p:panel>
+		<p:column>
+		<p:fieldset legend="Dados Complementares">
+			<h:panelGrid columns="2">
+				<p:outputLabel value="Status" style="font-size: 14px"/>
+				<p:selectOneMenu value="#{gerarOrdemServicoControlador.ordemServico.statusOrdemServico}"
+				id="selecionarStatus" converter="converterEnumStatus" disabled="true">
+					<f:selectItem itemLabel="Selecione..." noSelectionOption="true" />
+					<f:selectItems value="#{gerarOrdemServicoControlador.statusOrdemServico}" var="statusOrdemServico"
+					itemLabel="#{statusOrdemServico.descricaoStatus}" itemValue="#{statusOrdemServico}"/>
+				</p:selectOneMenu>
+
+				<p:outputLabel value="Forma Pagamento" style="font-size: 14px"/>
+				<p:selectOneMenu value="#{gerarOrdemServicoControlador.ordemServico.formaPagamento}"
+				id="selecionarFormaPagamento" converter="converterTipoFormaPagamento" disabled="#{gerarOrdemServicoControlador.alterarFormaPagamentOrcamento}">
+					<f:selectItem itemLabel="Selecione..." noSelectionOption="true" />
+					<f:selectItems value="#{gerarOrdemServicoControlador.formasPagamentos}" var="formaPagamento"
+					itemLabel="#{formaPagamento.descricao}" itemValue="#{formaPagamento}"/>
+				</p:selectOneMenu>
+			</h:panelGrid>
+		</p:fieldset>
+		</p:column>
+		<p:panel header="Dados do Veículo" id="dadosVeiculos">
+			<h:panelGrid columns="6">
+				<p:outputLabel value="Veiculo:" />
+				<p:selectOneMenu value="#{gerarOrdemServicoControlador.veiculoSelecionado}" id="selecionarVeiculo"
+				disabled="#{gerarOrdemServicoControlador.alterarVeiculoOrcamento}">
+					<f:selectItem itemLabel="Selecione..." noSelectionOption="true"/>
+					<f:selectItems value="#{gerarOrdemServicoControlador.cliente.veiculos}" var="veiculo"
+					itemLabel="#{veiculo.placa}" itemValue="#{veiculo}"/>
+					<p:ajax event="change" process="@this frmCadastroNovaOrdemServico:selecionarVeiculo" update="@this frmCadastroNovaOrdemServico:dadosVeiculos"/>
+				</p:selectOneMenu>
+				<p:outputLabel value="Placa:" />
+				<p:inputText size="7" onkeyup="this.value=this.value.toUpperCase();"
+					disabled="true" value="#{gerarOrdemServicoControlador.veiculoSelecionado.placa}"/>
+				<p:outputLabel value="Chassi:" />
+				<p:inputText size="20" value="#{gerarOrdemServicoControlador.veiculoSelecionado.chassi}"
+					onkeyup="this.value=this.value.toUpperCase();" disabled="true" />
+				<p:outputLabel value="Cor:" />
+				<p:inputText size="20" value="#{gerarOrdemServicoControlador.veiculoSelecionado.cor}"
+					onkeyup="this.value=this.value.toUpperCase();" disabled="true" />
+				<p:outputLabel value="Marca:" />
+				<p:inputText size="20" value="#{gerarOrdemServicoControlador.veiculoSelecionado.marca}"
+					onkeyup="this.value=this.value.toUpperCase();" disabled="true" />
+				<p:outputLabel value="Modelo:" />
+				<p:inputText size="20" value="#{gerarOrdemServicoControlador.veiculoSelecionado.modelo}"
+					onkeyup="this.value=this.value.toUpperCase();" disabled="true" />
+					
+			</h:panelGrid>
+		</p:panel>
+		<p:column>
+		<p:fieldset legend="Valores (R$)">
+			<h:panelGrid columns="4" title="Valores">
+				<p:outputLabel value="Descontos: " style="font-size: 14px"/>
+				<p:inputText size="10" id="descontos" value="#{gerarOrdemServicoControlador.ordemServico.valorTotalDesconto}"
+					onkeyup="this.value=this.value.toUpperCase();" disabled="true">
+					<f:convertNumber type="currency"/>
+					</p:inputText>
+
+				<p:outputLabel value="Subtotal: " style="font-size: 14px"/>
+				<p:inputText size="10" id="subtotal" value="#{gerarOrdemServicoControlador.ordemServico.valorSubtotal}"
+					onkeyup="this.value=this.value.toUpperCase();" disabled="true" >
+					<f:convertNumber type="currency"/>
+					</p:inputText>
+
+				<p:outputLabel value="Total: " style="font-size: 14px" />
+				<p:inputText size="10" id="totalOrdemServico" value="#{gerarOrdemServicoControlador.ordemServico.valorTotal}"
+					onkeyup="this.value=this.value.toUpperCase();" disabled="true" >
+					<f:convertNumber type="currency"/>
+					</p:inputText>
+			</h:panelGrid>
+		</p:fieldset>
+		</p:column>
+	</h:panelGrid>
+</ui:composition>

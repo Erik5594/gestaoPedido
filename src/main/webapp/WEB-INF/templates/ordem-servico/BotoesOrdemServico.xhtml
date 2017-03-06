@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<p:toolbar style="margin-bottom: 20px">
+		<p:toolbarGroup>
+			<p:button value="Novo"
+				outcome="/pages/private/servicos/ordem-servico/cadastro/CadastroOrdemServico" />
+			
+			<p:separator/>
+			
+			<p:commandButton value="Salvar" rendered="#{gerarOrdemServicoControlador.podeSomenteSalvar and gerarOrdemServicoControlador.ordemServico.id != null}"
+			actionListener="#{gerarOrdemServicoControlador.salvarOrdemServico()}" update="@form"/>
+			
+			<p:commandButton value="Abrir" rendered="#{gerarOrdemServicoControlador.renderizarBotaoAberto and gerarOrdemServicoControlador.ordemServico.id == null}"
+			actionListener="#{gerarOrdemServicoControlador.abrirOrdemServico()}" update="@form"/>
+			
+			<p:separator/>
+			
+			<p:commandButton value="Aprovar" rendered="#{gerarOrdemServicoControlador.renderizarBotaoAprovado}"
+			actionListener="#{gerarOrdemServicoControlador.aprovarOrdemServico()}" update="@form"/>
+			
+			<p:commandButton value="Em Andamento" rendered="#{gerarOrdemServicoControlador.renderizarBotaoEmAndamento}"
+			actionListener="#{gerarOrdemServicoControlador.darAndamentoOrdemServico()}" update="@form"/>
+			
+			<p:commandButton value="Pendente Confirmação" rendered="#{gerarOrdemServicoControlador.renderizarBotaoPendenteConfirmacao}"
+			actionListener="#{gerarOrdemServicoControlador.marcarPendenciaConfirmacaoOrdemServico()}" update="@form"/>
+			
+			<p:commandButton value="Serviços Realizados" rendered="#{gerarOrdemServicoControlador.renderizarBotaoServicosRealizados}"
+			actionListener="#{gerarOrdemServicoControlador.marcarServicosRealizadosOrdemServico()}" update="@form"/>
+			
+			<p:commandButton value="Finalizar" rendered="#{gerarOrdemServicoControlador.renderizarBotaoFinalizado}"
+			actionListener="#{gerarOrdemServicoControlador.finalizarOrdemServico()}" update="@form"/>
+			
+			<p:separator/>
+			
+			<p:commandButton value="Cancelar" rendered="#{gerarOrdemServicoControlador.renderizarBotaoCancelado}"
+			actionListener="#{gerarOrdemServicoControlador.cancelarOrdemServico()}" update="@form"/>
+		</p:toolbarGroup>
+		<p:toolbarGroup align="right">
+			<p:button value="Emitir Orçamento" rendered="#{gerarOrdemServicoControlador.renderizarBotaoEmissao}"
+				outcome="/pages/private/servicos/ordem-servico/emissao/emissaoPdf" target="blank">
+				<f:param name="pedido" value="#{gerarOrdemServicoControlador.ordemServico.id}"/>
+			</p:button>
+			
+			<p:separator/>
+			
+			<p:button value="Pesquisar"
+				outcome="/pages/private/servicos/ordem-servico/pesquisa/PesquisaOrdemServico" />
+		</p:toolbarGroup>
+	</p:toolbar>
+</ui:composition>

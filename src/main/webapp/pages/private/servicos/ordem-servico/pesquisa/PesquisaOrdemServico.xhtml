@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition template="/WEB-INF/templates/Layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<ui:define name="titulo">Pesquisa de Pedidos</ui:define>
+
+	<ui:define name="conteudo">
+		<h:form id="frmPesquisaPedido">
+			<p:messages id="mensagens" autoUpdate="true" closable="true"/>
+			<h1>Pesquisa de Pedido</h1>
+			<!-- Inicio Barra de opoces -->
+			<p:toolbar style="margin-bottom: 20px">
+				<!-- Inicio de grupo de Barra de opces a Direita -->
+				<p:toolbarGroup align="right">
+					<p:button value="Novo"
+						outcome="/pages/private/servicos/ordem-servico/cadastro/CadastroOrdemServico.xhtml" />
+				</p:toolbarGroup>
+				<!-- Fim de grupo de Barra de opces a Direita -->
+			</p:toolbar>
+			<!-- Fim Barra de opcoes -->
+			
+			#{pesquisaOrdemServicoControlador.init()}
+			
+			<p:dataTable value="#{pesquisaOrdemServicoControlador.ordemServicos}" var="pedido" rowKey="#{pedido.id}"
+			paginator="true" rows="6"
+			currentPageReportTemplate="Intervalo {startRecord}-{endRecord} do total de {totalRecords} registros"
+            paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+            rowsPerPageTemplate="6,15,50" 
+			style="margin-top:25px;" emptyMessage="Nenhum pedido encontrado!">
+			
+			<p:column headerText="Id" filterBy="#{pedido.id}" filterMatchMode="contains">
+				<p:outputLabel value="#{pedido.id}"/>
+			</p:column>
+			
+			<p:column headerText="Nome Cliente" filterBy="#{pedido.cliente.nome}" filterMatchMode="contains">
+				<p:outputLabel value="#{pedido.cliente.nome}"/>
+			</p:column>
+			
+			<p:column headerText="CNPJ/CPF Cliente" filterBy="#{pedido.cliente.cgcCpf}" filterMatchMode="contains">
+				<p:outputLabel value="#{pedido.cliente.cgcCpfFormatado}"/>
+			</p:column>
+			
+			<p:column headerText="Valor Total">
+				<p:outputLabel value="#{pedido.valorTotal}">
+				<f:convertNumber type="currency"/>
+				</p:outputLabel>
+			</p:column>
+			
+			<p:column headerText="Status" filterBy="#{pedido.statusOrdemServico.descricaoStatus}" filterMatchMode="contains">
+				<p:outputLabel value="#{pedido.statusOrdemServico.descricaoStatus}"/>
+			</p:column>
+			
+			<p:column>
+				<p:button outcome="/pages/private/servicos/ordem-servico/cadastro/CadastroOrdemServico" icon="ui-icon-pencil" title="Editar">
+					<f:param name="pedido" value="#{pedido.id}"/>
+				</p:button>
+			</p:column>
+				
+			</p:dataTable>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
